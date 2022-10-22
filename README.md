@@ -1,11 +1,8 @@
-// Pepeya
+# Pepeya
 
-EVM Tracing
-
-Does:
-- Contracts created
-- State changes
-- Events
+```
+pm2 start index.js --name pepeya
+```
 
 Frontpage (24hrs):
 - Most popular function signatures
@@ -15,3 +12,4 @@ Frontpage (24hrs):
             'address': ['transaction_id']
         }
     }
+
