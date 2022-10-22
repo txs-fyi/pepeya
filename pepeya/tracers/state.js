@@ -25,6 +25,13 @@ const stateTracer = {
     var acc = toHex(addr);
     var idx = toHex(key);
 
+    if (this.prestate[acc] === undefined) {
+      this.prestate[acc] = {
+        balance: "0x" + db.getBalance(addr).toString(16),
+        storage: {},
+      };
+    }
+
     if (this.prestate[acc].storage[idx] === undefined) {
       this.prestate[acc].storage[idx] = toHex(db.getState(addr, key));
     }
