@@ -16,5 +16,5 @@ if (missingEnv) {
 }
 
 module.exports = {
-  ETH_MAINNET_RPC_URL: process.env["ETH_MAINNET_RPC_URL"],
+  ETH_MAINNET_RPC_URL: process.env.ETH_MAINNET_RPC_URL,
 };
