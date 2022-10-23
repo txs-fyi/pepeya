@@ -1,5 +1,7 @@
 // Bundles the JavaScript EVM tracer into a string
 // This is cus JSON.stringify omits function types
+
+/* eslint-disable */
 const bundle = function (obj) {
   if (obj === null) return "null";
   if (Array.isArray(obj)) {
@@ -16,6 +18,7 @@ const bundle = function (obj) {
   }
   return "{" + ret.join(",") + "}";
 };
+/* eslint-enable */
 
 // Parses query string boolean
 const parseQueryStringBool = (qs, qsDefault = "") =>
