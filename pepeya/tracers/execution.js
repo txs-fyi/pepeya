@@ -354,7 +354,7 @@ const executionTracer = {
       // SSTORE
       slot: call.slot,
       before: call.before,
-      after: call.poststate,
+      after: call.after,
       sha3Cache: call.sha3Cache,
 
       // LOG
