@@ -3,7 +3,7 @@ const morgan = require("morgan");
 const express = require("express");
 
 const { ethers } = require("ethers");
-const { stateTracer, callTracer } = require("./pepeya/tracers");
+const { stateTracer, executionTracer } = require("./pepeya/tracers");
 const {
   bundle,
   parseQueryStringBool,
@@ -32,11 +32,11 @@ const tracerF = (providerUrl) => async (req, res) => {
 
   // By default everything is false
   const getStateTrace = parseQueryStringBool(req.query.stateTrace);
-  const getCallTrace = parseQueryStringBool(req.query.callTrace);
+  const getExecutionTrace = parseQueryStringBool(req.query.executionTrace);
 
-  if (!getStateTrace && !getCallTrace) {
+  if (!getStateTrace && !getExecutionTrace) {
     res.json({
-      info: "no trace specified options (one or more) are: [stateTrace|callTrace] in query string",
+      info: "no trace specified options (one or more) are: [stateTrace|executionTrace] in query string",
     });
     return;
   }
@@ -52,14 +52,14 @@ const tracerF = (providerUrl) => async (req, res) => {
     ]);
   const queries = [
     getStateTrace ? traceTxWith(bundle(stateTracer)) : async () => null,
-    getCallTrace ? traceTxWith(bundle(callTracer)) : async () => null,
+    getExecutionTrace ? traceTxWith(bundle(executionTracer)) : async () => null,
   ];
-  const [stateTrace, callTrace] = await Promise.all(queries);
+  const [stateTrace, executionTrace] = await Promise.all(queries);
 
   // Return the traces
   res.json({
     stateTrace,
-    callTrace,
+    executionTrace,
   });
 };
 

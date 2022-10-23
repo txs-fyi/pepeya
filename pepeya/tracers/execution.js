@@ -2,7 +2,7 @@
 
 // https://github.com/ethereum/go-ethereum/blob/c5436c8eb7380fc0efd02bc34ebd6b56b47f2db6/eth/tracers/js/internal/tracers/call_tracer_legacy.js
 
-const callTracer = {
+const executionTracer = {
   byte2Hex: function (byte) {
     if (byte < 0x10) {
       return "0" + byte.toString(16);
@@ -55,9 +55,7 @@ const callTracer = {
         input: toHex(log.memory.slice(inOff, inEnd)),
         gasIn: log.getGas(),
         gasCost: log.getCost(),
-        value: "0x" + log.stack.peek(0).toString(16),
-        storage: [],
-        logs: [],
+        value: "0x" + log.stack.peek(0).toString(16)
       };
       this.callstack.push(call);
       this.descended = true;
@@ -222,11 +220,11 @@ const callTracer = {
       }
 
       var left = this.callstack.length;
-      if (this.callstack[left - 1].logs === undefined) {
-        this.callstack[left - 1].logs = [];
+      if (this.callstack[left - 1].calls === undefined) {
+        this.callstack[left - 1].calls = [];
       }
 
-      this.callstack[left - 1].logs.push({
+      this.callstack[left - 1].calls.push({
         type: logop,
         address: toHex(log.contract.getAddress()),
         data: toHex(data),
@@ -254,12 +252,13 @@ const callTracer = {
       var poststate = toHex(toWord(log.stack.peek(1).toString(16)));
 
       var left = this.callstack.length;
-      if (this.callstack[left - 1].storage === undefined) {
-        this.callstack[left - 1].storage = [];
+      if (this.callstack[left - 1].calls === undefined) {
+        this.callstack[left - 1].calls = [];
       }
 
       // Storage address will the the "to" field
-      this.callstack[left - 1].storage.push({
+      this.callstack[left - 1].calls.push({
+        type: 'SSTORE',
         slot: slotHex,
         before: prestate,
         after: poststate,
@@ -317,15 +316,7 @@ const callTracer = {
       input: toHex(ctx.input),
       output: toHex(ctx.output),
       time: ctx.time,
-      storage: [],
-      logs: [],
     };
-    if (this.callstack[0].storage !== undefined) {
-      result.storage = this.callstack[0].storage;
-    }
-    if (this.callstack[0].logs !== undefined) {
-      result.logs = this.callstack[0].logs;
-    }
     if (this.callstack[0].calls !== undefined) {
       result.calls = this.callstack[0].calls;
     }
@@ -359,8 +350,17 @@ const callTracer = {
       error: call.error,
       time: call.time,
       calls: call.calls,
-      storage: call.storage,
-      logs: call.logs,
+
+      // SSTORE
+      slot: call.slot,
+      before: call.before,
+      after: call.poststate,
+      sha3Cache: call.sha3Cache,
+
+      // LOG
+      address: call.address,
+      data: call.data,
+      topics: call.topics,
     };
 
     for (var key in sorted) {
@@ -378,5 +378,5 @@ const callTracer = {
 };
 
 module.exports = {
-  callTracer,
+  executionTracer,
 };

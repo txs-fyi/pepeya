@@ -1,9 +1,9 @@
 const { stateTracer } = require("./state");
-const { callTracer } = require("./call");
+const { executionTracer } = require("./execution");
 const { fourByteTracer } = require("./4byte");
 
 module.exports = {
   stateTracer,
-  callTracer,
+  executionTracer,
   fourByteTracer,
 };
