@@ -12,7 +12,7 @@ const {
 const { ETH_MAINNET_RPC_URL } = require("./pepeya/constants");
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.use(cors());
 app.use(morgan("common"));

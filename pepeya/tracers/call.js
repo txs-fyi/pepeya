@@ -1,6 +1,11 @@
+/* eslint-disable */
+
 // https://github.com/ethereum/go-ethereum/blob/c5436c8eb7380fc0efd02bc34ebd6b56b47f2db6/eth/tracers/js/internal/tracers/call_tracer_legacy.js
 
 const callTracer = {
+  // Cache of all sha3, to determine the k-v mapping
+  sha3Cache: [],
+
   // callstack is the current recursive call stack of the EVM execution.
   callstack: [{}],
 
@@ -36,6 +41,7 @@ const callTracer = {
         gasIn: log.getGas(),
         gasCost: log.getCost(),
         value: "0x" + log.stack.peek(0).toString(16),
+        storage: [],
         logs: [],
       };
       this.callstack.push(call);
@@ -56,6 +62,7 @@ const callTracer = {
         gasIn: log.getGas(),
         gasCost: log.getCost(),
         value: "0x" + db.getBalance(log.contract.getAddress()).toString(16),
+        storage: [],
         logs: [],
       });
       return;
@@ -89,6 +96,7 @@ const callTracer = {
         gasCost: log.getCost(),
         outOff: log.stack.peek(4 + off).valueOf(),
         outLen: log.stack.peek(5 + off).valueOf(),
+        storage: [],
         logs: [],
       };
       if (op != "DELEGATECALL" && op != "STATICCALL") {
@@ -210,6 +218,36 @@ const callTracer = {
         topics,
       });
     }
+
+    // SHA3 to build up an index of hashes
+    var sha3call = log.op.toNumber() == 0x20;
+    if (sha3call && log.op.toNumber() == "SHA3") {
+    }
+
+    // SSTORE
+    var storecall = log.op.toNumber() == 0x55;
+    if (storecall && log.op.toString() == "SSTORE") {
+      var slot = toWord(log.stack.peek(0).toString(16));
+      var slotHex = toHex(slot);
+      var addr = log.contract.getAddress();
+      var prestate = toHex(db.getState(addr, slot));
+      var poststate = toHex(toWord(log.stack.peek(1).toString(16)));
+
+      var left = this.callstack.length;
+      if (this.callstack[left - 1].storage === undefined) {
+        this.callstack[left - 1].storage = [];
+      }
+
+      // Storage address will the the "to" field
+      this.callstack[left - 1].storage.push({
+        slot: slotHex,
+        before: prestate,
+        after: poststate,
+        sha3Cache: this.sha3Cache,
+      });
+
+      this.sha3Cache = [];
+    }
   },
 
   // fault is invoked when the actual execution of an opcode fails.
@@ -258,8 +296,12 @@ const callTracer = {
       input: toHex(ctx.input),
       output: toHex(ctx.output),
       time: ctx.time,
+      storage: [],
       logs: [],
     };
+    if (this.callstack[0].storage !== undefined) {
+      result.storage = this.callstack[0].storage;
+    }
     if (this.callstack[0].logs !== undefined) {
       result.logs = this.callstack[0].logs;
     }
@@ -296,6 +338,7 @@ const callTracer = {
       error: call.error,
       time: call.time,
       calls: call.calls,
+      storage: call.storage,
       logs: call.logs,
     };
 

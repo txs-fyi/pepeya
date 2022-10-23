@@ -1,3 +1,5 @@
+/* eslint-disable */ 
+
 // Extracting custom tracing from
 // https://github.com/ethereum/go-ethereum/blob/c5436c8eb7380fc0efd02bc34ebd6b56b47f2db6/eth/tracers/js/internal/tracers/prestate_tracer_legacy.js
 

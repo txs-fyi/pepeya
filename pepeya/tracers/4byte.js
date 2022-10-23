@@ -1,3 +1,5 @@
+/* eslint-disable */ 
+
 // Built into Geth, unfortunately most cloudproviders don't have it so defining it here for convinience
 // https://github.com/etclabscore/core-geth/blob/master/eth/tracers/js/internal/tracers/4byte_tracer_legacy.js
 
