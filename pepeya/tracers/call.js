@@ -3,6 +3,21 @@
 // https://github.com/ethereum/go-ethereum/blob/c5436c8eb7380fc0efd02bc34ebd6b56b47f2db6/eth/tracers/js/internal/tracers/call_tracer_legacy.js
 
 const callTracer = {
+  byte2Hex: function (byte) {
+    if (byte < 0x10) {
+      return "0" + byte.toString(16);
+    }
+    return byte.toString(16);
+  },
+
+  array2Hex: function (arr) {
+    var retVal = "";
+    for (let i = 0; i < arr.length; i++) {
+      retVal += this.byte2Hex(arr[i]);
+    }
+    return retVal;
+  },
+
   // Cache of all sha3, to determine the k-v mapping
   sha3Cache: [],
 
@@ -219,9 +234,14 @@ const callTracer = {
       });
     }
 
-    // SHA3 to build up an index of hashes
+    // KECCAK256 to build up an index of hashes
+    // Used for SSTORE mapping (in the future)
     var sha3call = log.op.toNumber() == 0x20;
-    if (sha3call && log.op.toNumber() == "SHA3") {
+    if (sha3call) {
+      var offset = parseInt(log.stack.peek(0));
+      var length = parseInt(log.stack.peek(1));
+      var data = log.memory.slice(offset, offset + length);
+      this.sha3Cache.push(this.array2Hex(data));
     }
 
     // SSTORE
@@ -246,6 +266,7 @@ const callTracer = {
         sha3Cache: this.sha3Cache,
       });
 
+      // Clears the cache
       this.sha3Cache = [];
     }
   },
